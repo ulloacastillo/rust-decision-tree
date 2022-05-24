@@ -64,6 +64,37 @@ impl <'a> DecisionTreeClassifier <'a> {
         println!("");
     }
 
+    pub fn gini_index(&mut self, Y: &Vec<&str>) -> f32 {
+        let class_labels = unique_vals(Y);
+        let mut gini = 0.0;
+        
+        for cls in class_labels.iter() {
+            let p_cls: f32 = (count_vals(&Y, &cls) / Y.len()) as f32;
+            gini = gini + (p_cls * p_cls);
+
+        }
+        gini
+    }
+}
+
+fn unique_vals<'a>(arr: &'a Vec<&str>) -> Vec<&'a str> {
+    let mut u_vals: Vec<&str> = vec![];
+    for el in arr.iter() {
+        if !u_vals.contains(&el) {
+            u_vals.push(el);
+        }
+    }
+    u_vals
+}
+
+fn count_vals(arr: &Vec<&str>, label: &str) -> usize {
+    let mut c = 0;
+    for el in arr.iter() {
+        if el == &label {
+            c = c + 1;
+        }
+    }
+    c
 }
 
 /*impl From<Node <'_>> for Option<Box<Node <'_>>> {
@@ -122,6 +153,7 @@ fn main() -> Result<(), Error> {
 
     let mut n = Node::new(a, b, "xd");
     println!("VALUES: {:?}", n);
+
 
     Ok(())
     
