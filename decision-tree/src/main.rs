@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::prelude::*;
+use rand::prelude::*;
 
 
 use csv::Error;
@@ -233,8 +234,20 @@ impl  DecisionTreeClassifier  {
             let sub_tree_r = &tree.as_ref().unwrap().right;
             return self.make_prediction(X, &sub_tree_r);
         }
+    }
 
-        
+    pub fn predict(&self, X: &Vec<Vec<f32>>) -> Vec<String> {
+        let mut predictions: Vec<String> = vec![];
+
+
+        for i in 0..X.len(){
+            let pred: String = self.make_prediction(&X[i], &self.root);
+            predictions.push(pred);
+        }
+
+        return predictions;
+
+     
     }
 
 }
@@ -288,6 +301,43 @@ fn get_column(matrix: &Vec<Vec<f32>>, col: usize) -> Vec<f32>{
         Some(Box::new(node))
     }
 }*/
+
+
+fn split_dataset(X: &mut Vec<Vec<f32>>, Y: &mut Vec<String>, train_size: f32) -> (Vec<Vec<f32>>,  Vec<String>, Vec<Vec<f32>>,Vec<String>) {
+    let n_train = (X.len() as f32 * train_size) as usize;
+    let n_test = X.len() - n_train;
+    
+    let mut X_test: Vec<Vec<f32>> = vec![];
+    let mut X_train: Vec<Vec<f32>> = vec![];
+    let mut Y_test: Vec<String> = vec![];
+    let mut Y_train: Vec<String> = vec![];
+    let mut idxs: Vec<usize> = (0..X.len()).collect();
+
+
+    let mut rng = rand::thread_rng();
+
+    idxs.shuffle(&mut rng);
+
+    
+    
+    for (i, &idx) in idxs.iter().enumerate(){
+        let xx: Vec<f32> = X[idx].clone();
+        let yy: String = Y[idx].clone();
+        
+        if i < n_train {
+            X_train.push(xx);
+            Y_train.push(yy);
+        }
+        else {
+            X_test.push(xx);
+            Y_test.push(yy);
+        }
+
+        
+    }
+    return (X_train, Y_train, X_test, Y_test);
+
+}
 
 fn main() -> Result<(), Error> {
     println!("Hello, world!");
@@ -352,18 +402,34 @@ fn main() -> Result<(), Error> {
 
 
 
-    let aa_ = get_column(&x, 1);
+    //let aa_ = get_column(&x, 1);
 
-    let mut tree_classifier = DecisionTreeClassifier::new(3, 3);
+    //let mut tree_classifier = DecisionTreeClassifier::new(3, 3);
 
-    tree_classifier.fit(&x, &y);
+    //tree_classifier.fit(&x, &y);
 
     
-    let x_i = vec![5.1,3.5,1.4,0.2];
+    //let x_i = vec![5.1,3.5,1.4,0.2];
 
-    let prediction = tree_classifier.make_prediction(&x_i, &tree_classifier.root);
+    //let X_test: Vec<Vec<f32>> = vec![vec![5.0,3.4,1.5,0.2], vec![4.4,2.9,1.4,0.2], vec![4.9,3.1,1.5,0.1], vec![5.6,2.9,3.6,1.3], vec![6.2,2.9,4.3,1.3], vec![6.1,2.6,5.6,1.4], vec![7.7,3.0,6.1,2.3]];
 
-    println!("prediction: {}", prediction);
+    //let predictions = tree_classifier.predict(&X_test);
+
+    //let prediction = tree_classifier.make_prediction(&x_i, &tree_classifier.root);
+
+    //println!("predictions: {:?}", predictions);
+
+    let (X_train, Y_train, X_test, Y_test) = split_dataset(&mut x, &mut y, 0.25);
+
+    let mut tree_classifier = DecisionTreeClassifier::new(5,5);
+    tree_classifier.fit(&X_train, &Y_train);
+
+    let predictions = tree_classifier.predict(&X_test);
+    println!("predictions: {:?}", predictions);
+    println!("predictions: {:?}", Y_test);
+
+
+
 
     Ok(())
     
