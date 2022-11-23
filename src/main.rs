@@ -50,15 +50,28 @@ fn main() {
     //setosa = 1; versicolor = 2; virginica = 3
     
     // Parameters n_trees, min_samples_split, max_depth, n_feats
-    let mut rf = random_forest::RandomForest::new(1, 2, 0, 4, 41);
+    //let mut rf = random_forest::RandomForest::new(1, 2, 0, 4, 41);
+    let mut tree = dtree::DecisionTreeClassifier::new(2, 0);
         
     println!("{}", x.len());
+
+
+    let mut x_array = [vec![5.1,3.5,1.4,0.2,1],
+                       vec![5.1,3.5,1.4,0.2,1],
+                       vec![5.1,3.5,1.4,0.2,1],
+                       vec![5.1,3.5,1.4,0.2,1],
+                       vec![5.1,3.5,1.4,0.2,1],
+                       vec![5.1,3.5,1.4,0.2,1],
+                       vec![5.1,3.5,1.4,0.2,1]];
+
+    let mut y_array = [1, 1, 2, 2, 3, 3, 1];
+    
 
     let now = Instant::now();
     
     
     
-    rf.fit(&x, &y);
+    tree.fit(&x, &y);
     
     
     let now2 = Instant::now();

@@ -4,6 +4,7 @@ use rand::prelude::*;
 use csv::Error;
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, Instant};
+use array_tool::vec::Uniq;
 
 mod utils;
 
@@ -126,7 +127,7 @@ impl DecisionTreeClassifier  {
             let feature_values: Vec<f32> = utils::get_column(&X, feature_index);
             
             let possible_thresholds = utils::unique_vals_f32(&feature_values);
-
+            //let possible_thresholds = feature_values.unique();
             //println!("{:?}", feature_values);
             
             
@@ -179,12 +180,13 @@ impl DecisionTreeClassifier  {
     }
 
     pub fn gini_index(&mut self, Y: &Vec<i32>) -> f32 {
-        let now = Instant::now();
-        let class_labels = utils::unique_vals(&Y);
-        let now2 = Instant::now();
-        println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
+        //let now = Instant::now();
+        //let class_labels = utils::unique_vals(&Y);
+        let class_labels = Y.unique();
+        //let now2 = Instant::now();
+        //println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
         
-        let now = Instant::now();
+        //let now = Instant::now();
         let mut gini = 0.0;
         
         for cls in class_labels {
@@ -195,8 +197,8 @@ impl DecisionTreeClassifier  {
             gini = gini + (p_cls * p_cls);
 
         }
-        let now2 = Instant::now();
-        println!("Gini,{:?},{:?}", now2.duration_since(now), Y.len());
+        //let now2 = Instant::now();
+        //println!("Gini,{:?},{:?}", now2.duration_since(now), Y.len());
         (1.0 - gini)
         //println!("gini: {}", gini);
     }
