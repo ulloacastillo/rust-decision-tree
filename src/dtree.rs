@@ -180,13 +180,14 @@ impl DecisionTreeClassifier  {
     }
 
     pub fn gini_index(&mut self, Y: &Vec<i32>) -> f32 {
-        //let now = Instant::now();
+        let now = Instant::now();
         //let class_labels = utils::unique_vals(&Y);
-        let class_labels = Y.unique();
-        //let now2 = Instant::now();
-        //println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
+        //let class_labels = Y.unique();
+        let class_labels = Y.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
+        let now2 = Instant::now();
+        println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
         
-        //let now = Instant::now();
+        let now = Instant::now();
         let mut gini = 0.0;
         
         for cls in class_labels {
@@ -197,8 +198,8 @@ impl DecisionTreeClassifier  {
             gini = gini + (p_cls * p_cls);
 
         }
-        //let now2 = Instant::now();
-        //println!("Gini,{:?},{:?}", now2.duration_since(now), Y.len());
+        let now2 = Instant::now();
+        println!("Gini,{:?},{:?}", now2.duration_since(now), Y.len());
         (1.0 - gini)
         //println!("gini: {}", gini);
     }
