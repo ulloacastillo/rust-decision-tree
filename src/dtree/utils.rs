@@ -3,7 +3,7 @@ use std::io::prelude::*;
 use rand::prelude::*;
 use csv::Error;
 use std::collections::{HashSet, HashMap};
-use std::time::{Duration, Instant};
+use crate::dtree::Matrix;
 
 pub fn set_panic_hook() {
     // When the `console_error_panic_hook` feature is enabled, we can call the
@@ -16,7 +16,7 @@ pub fn set_panic_hook() {
     console_error_panic_hook::set_once();
 }
 
-pub fn split_dataset(X: &mut Vec<Vec<f32>>, Y: &mut Vec<String>, train_size: f32) -> (Vec<Vec<f32>>,  Vec<String>, Vec<Vec<f32>>,Vec<String>) {
+/*pub fn split_dataset(X: &mut Vec<Vec<f32>>, Y: &mut Vec<String>, train_size: f32) -> (Vec<Vec<f32>>,  Vec<String>, Vec<Vec<f32>>,Vec<String>) {
     let n_train = (X.len() as f32 * train_size) as usize;
     let n_test = X.len() - n_train;
     
@@ -49,7 +49,7 @@ pub fn split_dataset(X: &mut Vec<Vec<f32>>, Y: &mut Vec<String>, train_size: f32
         
     }
     return (X_train, Y_train, X_test, Y_test);
-}
+}*/
 
 /*pub fn accuracy_per_label(Y: &Vec<String>, Y_hat: &Vec<String>) -> Vec<f32> {
     let mut acc: Vec<f32> = vec![];
@@ -88,7 +88,6 @@ pub fn count_vals(arr: &Vec<i32>, label: i32) -> usize {
 
 
 pub fn unique_vals(arr: &Vec<i32>) -> Vec<i32> {
-    
     let mut map: HashMap<i32, i32> = HashMap::new();
     let mut result: HashSet<i32> = HashSet::new();
   
@@ -101,8 +100,6 @@ pub fn unique_vals(arr: &Vec<i32>) -> Vec<i32> {
         }
     }
   
-
-
     result.into_iter().collect()
     
     
@@ -124,15 +121,15 @@ pub fn unique_vals_f32(arr: &Vec<f32>) -> Vec<f32> {
 }
 
 
-pub fn get_column(matrix: &Vec<Vec<f32>>, col: usize) -> Vec<f32>{
+
+pub fn get_column(matrix: &Matrix, ncol: usize) -> Vec<f32>{
     let mut column: Vec<f32> = vec![];
-    for row in matrix.iter() {
-        for (j, &colu) in row.iter().enumerate() {
-            if j == col {
-                //println!("{} {}", j, col);
-                column.push(colu);
-            }
-        }
+    let col = matrix.col;
+    let data = &matrix.data;
+    let mut value;
+    for i in 0..matrix.row{
+        value = data[col*i + ncol];
+        column.push(value);
     }
     column
 }

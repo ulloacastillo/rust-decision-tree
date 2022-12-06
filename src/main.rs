@@ -3,6 +3,7 @@ use std::io::prelude::*;
 use rand::prelude::*;
 use csv::Error;
 use std::time::{Duration, Instant};
+use crate::dtree::Matrix;
 
 mod dtree;
 mod utils;
@@ -26,7 +27,8 @@ fn main() {
 
     let values: Vec<String> = content.split('\n').map(str::to_string).collect();
     let mut y: Vec<i32> = vec![];
-    let mut x: Vec<Vec<f32>> = vec![];
+    let mut x: Vec<f32> = vec![];
+    
 
     // Pretty-print the results.
     let _xs: Vec<String> = values[0].split(',').map(str::to_string).collect();
@@ -42,7 +44,8 @@ fn main() {
         let a = &xs.len() -1;
         let b = &xs[a];
         &y.push(b.parse::<i32>().unwrap());
-        &x.push(aux);
+        &x.append(&mut aux);
+        //&x.push(aux);
     }
 
     
@@ -66,12 +69,18 @@ fn main() {
 
     let mut y_array = [1, 1, 2, 2, 3, 3, 1];
     
+        
+    let matrix: Matrix = Matrix {
+        data: x,
+        row: 9000,
+        col: 4
+    };
 
     let now = Instant::now();
     
+
     
-    
-    tree.fit(&x, &y);
+    tree.fit(&matrix, &y);
     
     
     let now2 = Instant::now();

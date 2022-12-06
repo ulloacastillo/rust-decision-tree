@@ -1,7 +1,7 @@
 use crate::dtree;
 use rand::prelude::*;
 
-
+use crate::dtree::Matrix;
 use serde::{Deserialize, Serialize};
 
 
@@ -115,7 +115,7 @@ impl RandomForest {
         }
     }
 
-    pub fn fit(&mut self, X: &Vec<Vec<f32>>, Y: &Vec<i32>) {
+    pub fn fit(&mut self, X: &Matrix, Y: &Vec<i32>) {
         
         let t: Vec<dtree::DecisionTreeClassifier> = Vec::new();
         self.trees = t;
@@ -123,12 +123,12 @@ impl RandomForest {
         
         for i in 0..self.n_trees{
             let mut tree: dtree::DecisionTreeClassifier = dtree::DecisionTreeClassifier::new(self.min_samples_split, self.max_depth);
-            let (X_sample, y_sample) = bootstrap_random_forest(&X, &Y, self.n_feats, &mut rng);
+            //let (X_sample, y_sample) = bootstrap_random_forest(&X, &Y, self.n_feats, &mut rng);
             println!("{:?}", i);
             
             //let (X_sample, y_sample) = bootstrap_random_forest(&X, &Y, 2, self.n_feats, &mut rng);
             
-            tree.fit(&X_sample, &y_sample);
+            tree.fit(&X, &Y);
             self.trees.push(tree);
             
             
