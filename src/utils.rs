@@ -75,16 +75,21 @@ pub fn set_panic_hook() {
     acc
 }*/
 
-pub fn count_vals(arr: &Vec<i32>, label: i32) -> usize {
+pub fn count_vals(arr: &Vec<i32>, label: &i32) -> usize {
     let mut c = 0;
     for el in arr.iter() {
-        if el == &label {
+        if el == label {
             c = c + 1;
         }
     }
     
     c
 }
+
+pub fn count_value_occurrences<T: Eq>(values: &Vec<T>, value: &T) -> usize {
+    values.iter().filter(|x| x == &value).count()
+}
+
 
 
 pub fn unique_vals(arr: &Vec<i32>) -> Vec<i32> {
@@ -103,6 +108,20 @@ pub fn unique_vals(arr: &Vec<i32>) -> Vec<i32> {
     result.into_iter().collect()
     
     
+}
+
+pub fn find_unique_values<T: Eq + std::hash::Hash>(values: &Vec<T>) -> Vec<&T> {
+    let mut unique_values = Vec::new();
+    let mut seen_values = std::collections::HashSet::new();
+    
+    for value in values {
+        if !seen_values.contains(value) {
+            unique_values.push(value);
+            seen_values.insert(value);
+        }
+    }
+    
+    unique_values
 }
 
 pub fn unique_vals_f32(arr: &Vec<f32>) -> Vec<f32> {
@@ -127,9 +146,13 @@ pub fn get_column(matrix: &Matrix, ncol: usize) -> Vec<f32>{
     let col = matrix.col;
     let data = &matrix.data;
     let mut value;
+
+
     for i in 0..matrix.row {
         value = data[col*i + ncol];
         column.push(value);
     }
     column
 }
+
+

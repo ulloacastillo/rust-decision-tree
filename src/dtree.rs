@@ -188,9 +188,9 @@ impl DecisionTreeClassifier  {
 
     pub fn gini_index(&mut self, Y: &Vec<i32>) -> f32 {
         let now = Instant::now();
-        //let class_labels = utils::unique_vals(&Y);
+        let class_labels = utils::find_unique_values(&Y);
         //let class_labels = Y.unique();
-        let class_labels = Y.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
+        //let class_labels = Y.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
         let now2 = Instant::now();
         //println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
         
@@ -199,7 +199,7 @@ impl DecisionTreeClassifier  {
         
         for cls in class_labels {
             
-            let p_cls: f32 = ((utils::count_vals(&Y, cls)  as f32) / (Y.len() as i32) as f32) as f32;
+            let p_cls: f32 = ((utils::count_vals(&Y, &cls)  as f32) / (Y.len() as i32) as f32) as f32;
             
             
             gini = gini + (p_cls * p_cls);
@@ -254,15 +254,16 @@ impl DecisionTreeClassifier  {
         
         for i in 0..n_rows{
             //println!("{} - {} - {}", i, (i*n_cols), (i*n_cols + n_cols)-1);
-            let mut v: Vec<f32> = X.data[(i*n_cols)..(i*n_cols + n_cols)].to_vec();
+            let mut v = &(X.data[(i*n_cols)..(i*n_cols + n_cols)]);
+
             let v_y: &i32 = &Y[i];
             if v[feature_index] <= threshold {
-              vec_left.append(&mut v);
+              vec_left.extend(v.iter());
               y_left.push(*v_y);
               row_left += 1;
             }
             else {
-              vec_right.append(&mut v);
+              vec_right.extend(v.iter());
               y_right.push(*v_y);
               row_right += 1;
             }
