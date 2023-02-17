@@ -56,7 +56,7 @@ fn main() {
     //let mut rf = random_forest::RandomForest::new(1, 2, 0, 4, 41);
     let mut tree = dtree::DecisionTreeClassifier::new(2, 0);
         
-    println!("{}", x.len());
+    //println!("{}", x.len());
 
 
     let mut x_array = [vec![5.1,3.5,1.4,0.2,1.],
@@ -72,7 +72,7 @@ fn main() {
         
     let matrix: Matrix = Matrix {
         data: x,
-        row: 9000,
+        row: 72000,
         col: 4
     };
 
