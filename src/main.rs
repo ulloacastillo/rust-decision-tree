@@ -72,7 +72,7 @@ fn main() {
         
     let matrix: Matrix = Matrix {
         data: x,
-        row: 72000,
+        row: 10000,
         col: 4
     };
 

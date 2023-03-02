@@ -23,6 +23,6 @@ array_tool = "1.0.0"
 # Tell `rustc` to optimize for small code size.
 opt-level = 3
 lto="fat"
-debug = true
-[profile.bench]
-debug = true
+
+[profile.dev]
+opt-level = 3

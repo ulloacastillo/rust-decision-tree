@@ -134,6 +134,8 @@ impl DecisionTreeClassifier  {
             let feature_values: Vec<f32> = utils::get_column(&X, feature_index);
             
             let possible_thresholds = utils::unique_vals_f32(&feature_values);
+            //let possible_thresholds = &feature_values.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
+            
             //let possible_thresholds = feature_values.unique();
             //println!("{:?}", feature_values);
             
@@ -190,7 +192,7 @@ impl DecisionTreeClassifier  {
         let now = Instant::now();
         //let class_labels = utils::find_unique_values(&Y);
         //let class_labels = Y.unique();
-        let class_labels = Y.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
+        let class_labels = &Y.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
         let now2 = Instant::now();
         //println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
         
@@ -293,6 +295,7 @@ impl DecisionTreeClassifier  {
 
     pub fn calculate_leaf_value(&mut self, Y: &Vec<i32> ) -> i32{
         let uni_vals: Vec<i32> = utils::unique_vals(&Y);
+        //let uni_vals = &Y.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
         let mut counts: Vec<usize> = vec![0; uni_vals.len()];
 
         for i in 0..uni_vals.len() {
