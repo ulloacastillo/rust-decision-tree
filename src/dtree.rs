@@ -201,7 +201,9 @@ impl DecisionTreeClassifier  {
         
         for cls in class_labels {
             
+            
             let p_cls: f32 = ((utils::count_vals(&Y, &cls)  as f32) / (Y.len() as i32) as f32) as f32;
+            //let p_cls: f32 = ((utils::count_value_occurrences(&Y, &cls)  as f32) / (Y.len() as i32) as f32) as f32;
             
             
             gini = gini + (p_cls * p_cls);

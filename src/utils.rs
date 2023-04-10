@@ -84,6 +84,7 @@ pub fn count_vals(arr: &Vec<i32>, label: &i32) -> usize {
     }
     
     c
+
 }
 
 pub fn count_value_occurrences<T: Eq>(values: &Vec<T>, value: &T) -> usize {
