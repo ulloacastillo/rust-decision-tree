@@ -1,4 +1,4 @@
-use crate::dtree::Matrix;
+use crate::dtree::{Matrix, MatrixArray};
 use csv::Error;
 use rand::prelude::*;
 use std::env;
@@ -40,15 +40,16 @@ fn main() {
         }
         let a = &xs.len() - 1;
         let b = &xs[a];
-        &y.push(b.parse::<i32>().unwrap());
+
+        &y.push(b.parse::<f32>().unwrap() as i32);
         &x.append(&mut aux);
         //&x.push(aux);
     }
 
     let args: Vec<String> = env::args().collect();
 
-    let rows_train = args[1].parse::<usize>().unwrap();
-    let cols_train = args[2].parse::<usize>().unwrap();
+    let rows_train: usize = args[1].parse::<usize>().unwrap();
+    let cols_train: usize = args[2].parse::<usize>().unwrap();
 
     //println!("{:?}", rows_train * 2);
 
