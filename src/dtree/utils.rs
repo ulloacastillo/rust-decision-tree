@@ -1,7 +1,7 @@
-use std::fs::File;
-use std::io::prelude::*;
-use rand::prelude::*;
-use csv::Error;
+
+
+
+
 use std::collections::{HashSet, HashMap};
 use crate::dtree::Matrix;
 
@@ -79,7 +79,7 @@ pub fn count_vals(arr: &Vec<i32>, label: &i32) -> usize {
     let mut c = 0;
     for el in arr.iter() {
         if el == label {
-            c = c + 1;
+            c += 1;
         }
     }
     
@@ -126,7 +126,7 @@ pub fn find_unique_values<T: Eq + std::hash::Hash>(values: &Vec<T>) -> Vec<&T> {
 pub fn unique_vals_f32(arr: &Vec<f32>) -> Vec<f32> {
     let mut u_vals: Vec<f32> = vec![];
     for el in arr.iter() {
-        if !u_vals.contains(&el) {
+        if !u_vals.contains(el) {
             u_vals.push(*el);
         }
     }
@@ -135,7 +135,7 @@ pub fn unique_vals_f32(arr: &Vec<f32>) -> Vec<f32> {
     
     //let returnded = u_vals.clone();
 
-    return u_vals;
+    u_vals
 }
 
 

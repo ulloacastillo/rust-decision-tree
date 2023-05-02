@@ -9,4 +9,4 @@ src/random_forest.rs:
 src/utils.rs:
 Cargo.toml:
 
-# env-dep:CLIPPY_ARGS=
+# env-dep:CLIPPY_ARGS=--no-deps__CLIPPY_HACKERY__

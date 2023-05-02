@@ -15,9 +15,9 @@ pub fn bootstrap_random_forest(X: &Vec<Vec<f32>>, Y: &Vec<i32>, n_features: usiz
     let mut ft_ixs: Vec<usize> = vec![];
     let mut rnd_ft_idx: usize;
     let n_cols = X[0].len();
-    for i in 0..n_features {
+    for _i in 0..n_features {
         rnd_ft_idx = rng.gen_range(0..n_cols);
-        while (ft_ixs.contains(&rnd_ft_idx)) {
+        while ft_ixs.contains(&rnd_ft_idx) {
             rnd_ft_idx = rng.gen_range(0..n_cols);
             
         }
@@ -26,7 +26,7 @@ pub fn bootstrap_random_forest(X: &Vec<Vec<f32>>, Y: &Vec<i32>, n_features: usiz
     }
     //println!("{:?}", ft_ixs);
     let n_samples: usize = X.len();
-    for i in 0..n_samples {
+    for _i in 0..n_samples {
         let rnd_idx = rng.gen_range(0..n_samples);
 
         let mut X_i: Vec<f32> = vec![];
@@ -37,7 +37,7 @@ pub fn bootstrap_random_forest(X: &Vec<Vec<f32>>, Y: &Vec<i32>, n_features: usiz
         y_.push(Y[rnd_idx]);
     }
 
-    return (X_, y_)
+    (X_, y_)
 }
 
 pub fn swap_matrix_axes(matrix: &Vec<Vec<i32>>) -> Vec<Vec<i32>>{
@@ -62,7 +62,7 @@ pub fn count_val(el: i32, Y: &Vec<i32>) -> usize{
     let mut c: usize = 0;
     for i in 0..Y.len() {
         if Y[i] == el {
-            c = c + 1;
+            c += 1;
         }
     }c
 }
@@ -71,7 +71,7 @@ pub fn get_most_common(Y: &Vec<i32>) -> i32 {
     let mut common_count: usize = 0;
     let mut common_elem: i32 = 0;
     for i in 0..Y.len() {
-        let count = count_val(Y[i], &Y);
+        let count = count_val(Y[i], Y);
         if count > common_count {
             common_count = count;
             common_elem = Y[i];
@@ -106,11 +106,11 @@ impl RandomForest {
     pub fn new(n_trees: usize, min_samples_split: usize, max_depth: usize, n_feats: usize, seed: u64) -> Self {
         let t: Vec<dtree::DecisionTreeClassifier> = Vec::new();
         RandomForest {
-            n_trees: n_trees,
-            min_samples_split: min_samples_split,
-            max_depth: max_depth,
-            n_feats: n_feats,
-            seed: seed,
+            n_trees,
+            min_samples_split,
+            max_depth,
+            n_feats,
+            seed,
             trees: t
         }
     }
@@ -119,7 +119,7 @@ impl RandomForest {
         
         let t: Vec<dtree::DecisionTreeClassifier> = Vec::new();
         self.trees = t;
-        let mut rng = rand::rngs::StdRng::seed_from_u64(self.seed);
+        let _rng = rand::rngs::StdRng::seed_from_u64(self.seed);
         
         for i in 0..self.n_trees{
             let mut tree: dtree::DecisionTreeClassifier = dtree::DecisionTreeClassifier::new(self.min_samples_split, self.max_depth);
@@ -128,7 +128,7 @@ impl RandomForest {
             
             //let (X_sample, y_sample) = bootstrap_random_forest(&X, &Y, 2, self.n_feats, &mut rng);
             
-            tree.fit(&X, &Y);
+            tree.fit(X, Y);
             self.trees.push(tree);
             
             
@@ -140,7 +140,7 @@ impl RandomForest {
     pub fn predict(&mut self, X: &Vec<Vec<f32>>) -> Vec<i32> {
         let mut tree_preds: Vec<Vec<i32>> = vec![];
         for i in 0..self.n_trees {
-            let y_pred_i = self.trees[i].predict(&X);
+            let y_pred_i = self.trees[i].predict(X);
             tree_preds.push(y_pred_i);
         }
         //println!("{}", tree_preds.len());

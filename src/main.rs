@@ -1,10 +1,10 @@
-use crate::dtree::{Matrix, MatrixArray};
-use csv::Error;
+use crate::dtree::{Matrix};
+
 use rand::prelude::*;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 
 mod dtree;
 mod random_forest;
@@ -41,8 +41,8 @@ fn main() {
         let a = &xs.len() - 1;
         let b = &xs[a];
 
-        &y.push(b.parse::<f32>().unwrap() as i32);
-        &x.append(&mut aux);
+        y.push(b.parse::<f32>().unwrap() as i32);
+        x.append(&mut aux);
         //&x.push(aux);
     }
 
@@ -61,7 +61,7 @@ fn main() {
 
     //println!("{}", x.len());
 
-    let mut x_array = [
+    let _x_array = [
         vec![5.1, 3.5, 1.4, 0.2, 1.],
         vec![5.1, 3.5, 1.4, 0.2, 1.],
         vec![5.1, 3.5, 1.4, 0.2, 1.],
@@ -71,7 +71,7 @@ fn main() {
         vec![5.1, 3.5, 1.4, 0.2, 1.],
     ];
 
-    let mut y_array = [1, 1, 2, 2, 3, 3, 1];
+    let _y_array = [1, 1, 2, 2, 3, 3, 1];
 
     let matrix: Matrix = Matrix {
         data: x,
