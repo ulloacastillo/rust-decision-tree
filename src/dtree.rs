@@ -1,15 +1,11 @@
-
-
 use rand::prelude::*;
 
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-
-
 use std::io::prelude::*;
-use std::time::{Instant};
+use std::time::Instant;
 
 mod utils;
 
@@ -77,7 +73,13 @@ impl DecisionTreeClassifier {
         }
     }
 
-    pub fn build_tree(&mut self, X: &Matrix, Y: &Vec<i32>, curr_depth: usize) -> Option<Box<Node>> {
+    pub fn build_tree(
+        &mut self,
+        X: &Matrix,
+        Y: &Vec<i32>,
+        ps: &HashMap<usize, (f32, f32)>,
+        curr_depth: usize,
+    ) -> Option<Box<Node>> {
         let num_samples: usize = X.row;
         let num_features: usize = X.col;
 
@@ -91,7 +93,7 @@ impl DecisionTreeClassifier {
 
         if num_samples >= self.min_samples_split && (curr_depth as f32) <= depth {
             let best_split: BestSplitStruct =
-                self.get_best_split(X, Y, num_samples, num_features);
+                self.get_best_split(X, Y, &ps, num_samples, num_features);
 
             //println!("{:?}", best_split);
 
@@ -100,12 +102,14 @@ impl DecisionTreeClassifier {
                     self,
                     &best_split.dataset_left,
                     &best_split.y_left,
+                    &ps,
                     curr_depth + 1,
                 );
                 let right_subtree = DecisionTreeClassifier::build_tree(
                     self,
                     &best_split.dataset_right,
                     &best_split.y_right,
+                    &ps,
                     curr_depth + 1,
                 );
 
@@ -135,6 +139,7 @@ impl DecisionTreeClassifier {
         &mut self,
         X: &Matrix,
         Y: &Vec<i32>,
+        ps: &HashMap<usize, (f32, f32)>,
         _num_samples: usize,
         num_features: usize,
     ) -> BestSplitStruct {
@@ -159,16 +164,30 @@ impl DecisionTreeClassifier {
         let mut max_info_gain = -std::f32::INFINITY;
 
         for feature_index in 0..num_features {
-            let feature_values: Vec<f32> = utils::get_column(X, feature_index);
+            //let feature_values: Vec<f32> = utils::get_column(X, feature_index);
 
             // let possible_thresholds = utils::unique_vals_f32(&feature_values);
 
-            let possible_thresholds = &feature_values.iter().fold(vec![], |mut vect, x| {
+            /*let possible_thresholds: Vec<_> =
+            X.data.chunks(X.col).collect::<Vec<&[f32]>>().iter().fold(
+                Vec::new(),
+                |mut vect, x| {
+                    if !vect.contains(&x[feature_index]) {
+                        vect.push(x[feature_index]);
+                    }
+                    vect
+                },
+            );*/
+
+            /*let possible_thresholds = &feature_values.iter().fold(vec![], |mut vect, x| {
                 if !vect.contains(x) {
                     vect.push(*x);
                 }
                 vect
-            });
+            });*/
+
+            //println!("{:?}, {:?}", possible_thresholds.len(), feature_values.len());
+
             //let possible_thresholds = &feature_values.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
 
             //let possible_thresholds = feature_values.unique();
@@ -176,7 +195,18 @@ impl DecisionTreeClassifier {
 
             let mut c = 0;
 
-            for &threshold in possible_thresholds.iter() {
+            let pss = ps.get(&feature_index).unwrap();
+
+            let mut range_threshold: Vec<f32> = Vec::with_capacity(10);
+
+            for i in 0..10 {
+                let delta: f32 = (pss.1 - pss.0) / 9 as f32;
+                range_threshold.push(pss.0 + i as f32 * delta);
+            }
+
+            println!("{:?} {:?}", feature_index, range_threshold);
+
+            for &threshold in range_threshold.iter() {
                 //println!("aaaaaaaaaa -> {:?} - {:?}", feature_index, threshold);
 
                 c += 1;
@@ -373,7 +403,28 @@ impl DecisionTreeClassifier {
     }
 
     pub fn fit(&mut self, X: &Matrix, Y: &Vec<i32>) {
-        self.root = self.build_tree(X, Y, 0);
+        let mut ps: HashMap<usize, (f32, f32)> = HashMap::new();
+
+        for f_idx in 0..X.col {
+            let feature_values: Vec<f32> = utils::get_column(X, f_idx);
+            let mut possible_thresholds: Vec<f32> =
+                feature_values.iter().fold(Vec::new(), |mut vect, x| {
+                    if !vect.contains(x) {
+                        vect.push(*x);
+                    }
+                    vect
+                });
+            possible_thresholds.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            ps.insert(
+                f_idx,
+                (
+                    possible_thresholds[0],
+                    possible_thresholds[possible_thresholds.len() - 1],
+                ),
+            );
+        }
+        println!("{:?}", ps);
+        self.root = self.build_tree(X, Y, &ps, 0);
     }
 
     pub fn make_prediction(&self, X: &Vec<f32>, tree: &Option<Box<Node>>) -> i32 {
