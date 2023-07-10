@@ -15,7 +15,13 @@ fn print_type_of<T>(_: &T) {
 }
 
 fn main() {
-    let mut file = File::open("./iris.csv").expect("No se pudo abrir el arcivo");
+    let args: Vec<String> = env::args().collect();
+
+    let rows_train: usize = args[1].parse::<usize>().unwrap();
+    let cols_train: usize = args[2].parse::<usize>().unwrap();
+    let file_name = &args[3];
+
+    let mut file = File::open(format!("{}.csv", file_name)).expect("No se pudo abrir el arcivo");
 
     let mut content = String::new();
 
@@ -45,11 +51,6 @@ fn main() {
         x.append(&mut aux);
         //&x.push(aux);
     }
-
-    let args: Vec<String> = env::args().collect();
-
-    let rows_train: usize = args[1].parse::<usize>().unwrap();
-    let cols_train: usize = args[2].parse::<usize>().unwrap();
 
     //println!("{:?}", rows_train * 2);
 
@@ -86,6 +87,8 @@ fn main() {
     let now2 = Instant::now();
 
     println!("{:?}", now2.duration_since(now));
+
+    println!("predictions {:?}", tree.predict(&matrix));
 
     //let mut file = std::fs::File::create("output.pickle").unwrap();
     //serde_pickle::to_writer(&mut file, &rf, serde_pickle::SerOptions::new()).unwrap();
