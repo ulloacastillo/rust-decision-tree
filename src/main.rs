@@ -1,10 +1,10 @@
-use crate::dtree::{Matrix};
+use crate::dtree::Matrix;
 
 use rand::prelude::*;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
-use std::time::{Instant};
+use std::time::Instant;
 
 mod dtree;
 mod random_forest;
@@ -84,6 +84,7 @@ fn main() {
     tree.fit(&matrix, &y);
 
     let now2 = Instant::now();
+
     println!("{:?}", now2.duration_since(now));
 
     //let mut file = std::fs::File::create("output.pickle").unwrap();

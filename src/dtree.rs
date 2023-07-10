@@ -204,8 +204,6 @@ impl DecisionTreeClassifier {
                 range_threshold.push(pss.0 + i as f32 * delta);
             }
 
-            println!("{:?} {:?}", feature_index, range_threshold);
-
             for &threshold in range_threshold.iter() {
                 //println!("aaaaaaaaaa -> {:?} - {:?}", feature_index, threshold);
 
@@ -423,11 +421,11 @@ impl DecisionTreeClassifier {
                 ),
             );
         }
-        println!("{:?}", ps);
+        //println!("{:?}", ps);
         self.root = self.build_tree(X, Y, &ps, 0);
     }
 
-    pub fn make_prediction(&self, X: &Vec<f32>, tree: &Option<Box<Node>>) -> i32 {
+    pub fn make_prediction(&self, X: &[f32], tree: &Option<Box<Node>>) -> i32 {
         if tree.as_ref().unwrap().value != 0 {
             return tree.as_ref().unwrap().value;
         }
@@ -444,11 +442,13 @@ impl DecisionTreeClassifier {
         }
     }
 
-    pub fn predict(&self, X: &Vec<Vec<f32>>) -> Vec<i32> {
+    pub fn predict(&self, X: &Matrix) -> Vec<i32> {
         let mut predictions: Vec<i32> = vec![];
+        let n_cols = X.col;
 
-        for i in 0..X.len() {
-            let pred: i32 = self.make_prediction(&X[i], &self.root);
+        for i in 0..X.row {
+            let pred: i32 =
+                self.make_prediction(&X.data[(i * n_cols)..(i * n_cols + n_cols)], &self.root);
             predictions.push(pred);
         }
 
