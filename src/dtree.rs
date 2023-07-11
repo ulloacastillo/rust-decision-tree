@@ -77,7 +77,7 @@ impl DecisionTreeClassifier {
         &mut self,
         X: &Matrix,
         Y: &Vec<i32>,
-        ps: &HashMap<usize, (f32, f32, Vec<f32>)>,
+        ps: &HashMap<usize, (f32, f32)>,
         curr_depth: usize,
     ) -> Option<Box<Node>> {
         let num_samples: usize = X.row;
@@ -139,7 +139,7 @@ impl DecisionTreeClassifier {
         &mut self,
         X: &Matrix,
         Y: &Vec<i32>,
-        ps: &HashMap<usize, (f32, f32, Vec<f32>)>,
+        ps: &HashMap<usize, (f32, f32)>,
         _num_samples: usize,
         num_features: usize,
     ) -> BestSplitStruct {
@@ -197,8 +197,12 @@ impl DecisionTreeClassifier {
 
             let pss = ps.get(&feature_index).unwrap();
 
-            if pss.2.len() <= 10 {
-                for &threshold in pss.2.iter() {
+            let mut range_threshold: Vec<f32> = Vec::with_capacity(10);
+
+            for i in 0..10 {
+                let delta: &f32 = &((pss.1 - pss.0) / 9 as f32);
+                range_threshold.push((pss.0 + i as f32 * delta));
+                for &threshold in range_threshold.iter() {
                     //println!("aaaaaaaaaa -> {:?} - {:?}", feature_index, threshold);
 
                     c += 1;
@@ -225,46 +229,11 @@ impl DecisionTreeClassifier {
                             max_info_gain = curr_info_gain;
                         }
                     }
-                }
-            } else {
-                let mut range_threshold: Vec<f32> = Vec::with_capacity(10);
 
-                for i in 0..10 {
-                    let delta: &f32 = &((pss.1 - pss.0) / 9 as f32);
-                    range_threshold.push((pss.0 + i as f32 * delta));
-                    for &threshold in range_threshold.iter() {
-                        //println!("aaaaaaaaaa -> {:?} - {:?}", feature_index, threshold);
-
-                        c += 1;
-                        let dataset_splitted: (Matrix, Matrix, Vec<i32>, Vec<i32>) =
-                            self.split(X, Y, feature_index, threshold);
-
-                        let dataset_left: Matrix = dataset_splitted.0;
-                        let dataset_right: Matrix = dataset_splitted.1;
-
-                        if dataset_left.row > 0 && dataset_right.row > 0 {
-                            let y_left: Vec<i32> = dataset_splitted.2;
-                            let y_right: Vec<i32> = dataset_splitted.3;
-
-                            let curr_info_gain = self.information_gain(Y, &y_left, &y_right);
-
-                            if curr_info_gain > max_info_gain {
-                                best_split.feature_index = feature_index;
-                                best_split.threshold = threshold;
-                                best_split.dataset_left = dataset_left;
-                                best_split.dataset_right = dataset_right;
-                                best_split.info_gain = curr_info_gain;
-                                best_split.y_left = y_left;
-                                best_split.y_right = y_right;
-                                max_info_gain = curr_info_gain;
-                            }
-                        }
-
-                        //println!("-------");
-                        //println!("a--->{:?}", best_split.feature_index);
-                        //println!("a--->{:?}", best_split.threshold);
-                        //println!("a--->{:?}", best_split.info_gain);
-                    }
+                    //println!("-------");
+                    //println!("a--->{:?}", best_split.feature_index);
+                    //println!("a--->{:?}", best_split.threshold);
+                    //println!("a--->{:?}", best_split.info_gain);
                 }
             }
         }
@@ -431,7 +400,7 @@ impl DecisionTreeClassifier {
     }
 
     pub fn fit(&mut self, X: &Matrix, Y: &Vec<i32>) {
-        let mut ps: HashMap<usize, (f32, f32, Vec<f32>)> = HashMap::new();
+        let mut ps: HashMap<usize, (f32, f32)> = HashMap::new();
 
         for f_idx in 0..X.col {
             let feature_values: Vec<f32> = utils::get_column(X, f_idx);
@@ -448,7 +417,6 @@ impl DecisionTreeClassifier {
                 (
                     possible_thresholds[0],
                     possible_thresholds[possible_thresholds.len() - 1],
-                    possible_thresholds,
                 ),
             );
         }

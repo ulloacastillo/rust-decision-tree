@@ -138,10 +138,10 @@ impl RandomForest {
         }
     }
 
-    /*pub fn predict(&mut self, X: &Vec<Vec<f32>>) -> Vec<i32> {
+    pub fn predict(&mut self, X: &Matrix) -> Vec<i32> {
         let mut tree_preds: Vec<Vec<i32>> = vec![];
         for i in 0..self.n_trees {
-            let y_pred_i = self.trees[i].predict(X);
+            let y_pred_i = self.trees[i].predict(&X);
             tree_preds.push(y_pred_i);
         }
         //println!("{}", tree_preds.len());
@@ -154,6 +154,5 @@ impl RandomForest {
             y_pred.push(most_common_label)
         }
         y_pred
-
-    }*/
+    }
 }
