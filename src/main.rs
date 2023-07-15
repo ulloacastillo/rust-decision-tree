@@ -53,15 +53,24 @@ fn main() {
 
     let mut tree = dtree::DecisionTreeClassifier::new(2, 0);
 
+    let matrix_width = x.len() / rows_train;
+    let submatrix: Vec<f32> = x
+        .chunks(matrix_width)
+        .take(rows_train)
+        .flat_map(|row| row.iter().take(cols_train).cloned())
+        .collect();
+
     let matrix: Matrix = Matrix {
-        data: x,
+        data: submatrix,
         row: rows_train,
         col: cols_train,
     };
 
+    let sub_y: Vec<i32> = y.iter().take(rows_train).cloned().collect();
+
     let now = Instant::now();
 
-    tree.fit(&matrix, &y);
+    tree.fit(&matrix, &sub_y);
 
     let now2 = Instant::now();
 
