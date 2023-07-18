@@ -60,21 +60,16 @@ fn main() {
         .flat_map(|row| row.iter().take(cols_train).cloned())
         .collect();
 
+    let sub_y: Vec<i32> = y.iter().take(rows_train).cloned().collect();
+
     let matrix: Matrix = Matrix {
         data: submatrix,
         row: rows_train,
         col: cols_train,
     };
 
-    let sub_y: Vec<i32> = y.iter().take(rows_train).cloned().collect();
-
-    let now = Instant::now();
-
     tree.fit(&matrix, &sub_y);
 
-    let now2 = Instant::now();
-
-    println!("{:?}", now2.duration_since(now));
     /*
            let X_test: Vec<f32> = vec![
                65.0, 0.0, 2.0, 140.0, 417.0, 1.0, 0.0, 157.0, 0.0, 0.8, 2.0, 1.0, 2.0, 54.0, 1.0, 0.0,

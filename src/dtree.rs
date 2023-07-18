@@ -85,10 +85,12 @@ impl DecisionTreeClassifier {
 
         // allow the tree get deeper as possible
 
-        let depth: f32 = std::f32::INFINITY;
+        let depth: f32;
 
         if self.max_depth > 0 {
-            let _depth: f32 = self.max_depth as f32;
+            depth = self.max_depth as f32;
+        } else {
+            depth = std::f32::INFINITY;
         }
 
         if (num_samples >= self.min_samples_split) && ((curr_depth as f32) <= depth) {
@@ -124,6 +126,7 @@ impl DecisionTreeClassifier {
                 }));
             }
         }
+
         let leaf_value: i32 = self.calculate_leaf_value(Y);
 
         Some(Box::new(Node {
@@ -143,7 +146,7 @@ impl DecisionTreeClassifier {
         _num_samples: usize,
         num_features: usize,
     ) -> BestSplitStruct {
-        let mut best_split = BestSplitStruct {
+        let mut best_split: BestSplitStruct = BestSplitStruct {
             feature_index: 0,
             threshold: 0.0,
             dataset_left: Matrix {
@@ -164,40 +167,11 @@ impl DecisionTreeClassifier {
         let mut max_info_gain = -std::f32::INFINITY;
 
         for feature_index in 0..num_features {
-            //let feature_values: Vec<f32> = utils::get_column(X, feature_index);
-
-            // let possible_thresholds = utils::unique_vals_f32(&feature_values);
-
-            /*let possible_thresholds: Vec<_> =
-            X.data.chunks(X.col).collect::<Vec<&[f32]>>().iter().fold(
-                Vec::new(),
-                |mut vect, x| {
-                    if !vect.contains(&x[feature_index]) {
-                        vect.push(x[feature_index]);
-                    }
-                    vect
-                },
-            );*/
-
-            /*let possible_thresholds = &feature_values.iter().fold(vec![], |mut vect, x| {
-                if !vect.contains(x) {
-                    vect.push(*x);
-                }
-                vect
-            });*/
-
-            //println!("{:?}, {:?}", possible_thresholds.len(), feature_values.len());
-
-            //let possible_thresholds = &feature_values.iter().fold(vec![], |mut vect, x| {if !vect.contains(x) {vect.push(*x);} vect});
-
-            //let possible_thresholds = feature_values.unique();
-            //println!("{:?}", feature_values);
-
             let mut c = 0;
 
             let pss = ps.get(&feature_index).unwrap();
 
-            let candidates = &pss.2;
+            let candidates: &Vec<f32> = &pss.2;
 
             for &threshold in candidates.iter() {
                 //println!("aaaaaaaaaa -> {:?} - {:?}", feature_index, threshold);
@@ -228,21 +202,23 @@ impl DecisionTreeClassifier {
                 }
             }
         }
+
         best_split
     }
 
     pub fn gini_index(&mut self, Y: &Vec<i32>) -> f32 {
-        let _now = Instant::now();
         //let class_labels = utils::find_unique_values(&Y);
         //let class_labels = Y.unique();
 
+        let now = Instant::now();
         let class_labels = Y.iter().fold(vec![], |mut vect, x| {
             if !vect.contains(x) {
                 vect.push(*x);
             }
             vect
         });
-
+        let now2 = Instant::now();
+        println!("class_labels {:?}", now2.duration_since(now));
         let _now2 = Instant::now();
         //println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
 
@@ -258,25 +234,6 @@ impl DecisionTreeClassifier {
             })
             .sum();
 
-        // let gini_sum: f32 = class_labels.iter().fold(0.0, |mut acc, x| {
-        //     let p_cls: f32 = ((utils::count_vals(&Y, &x) as f32) / (*y_len) as f32) as f32;
-
-        //     acc += p_cls * p_cls;
-        //     acc
-        // });
-
-        /*
-        let mut gini = 0.0;
-        for cls in class_labels {
-            let p_cls: f32 =
-                ((utils::count_vals(&Y, &cls) as f32) / (Y.len() as i32) as f32) as f32;
-            //let p_cls: f32 = ((utils::count_value_occurrences(&Y, &cls)  as f32) / (Y.len() as i32) as f32) as f32;
-
-            gini = gini + (p_cls * p_cls);
-        }*/
-
-        let _now2 = Instant::now();
-        //println!("Gini,{:?},{:?}", now2.duration_since(now), Y.len());
         1.0 - gini_map
     }
 
@@ -326,6 +283,8 @@ impl DecisionTreeClassifier {
         let mut row_left = 0;
         let mut row_right = 0;
 
+        let now = Instant::now();
+
         for i in 0..n_rows {
             //println!("{} - {} - {}", i, (i*n_cols), (i*n_cols + n_cols)-1);
             let v = &(X.data[(i * n_cols)..(i * n_cols + n_cols)]);
@@ -334,10 +293,12 @@ impl DecisionTreeClassifier {
             if v[feature_index] <= threshold {
                 vec_left.extend(v.iter());
                 y_left.push(*v_y);
+
                 row_left += 1;
             } else {
                 vec_right.extend(v.iter());
                 y_right.push(*v_y);
+
                 row_right += 1;
             }
         }
@@ -354,6 +315,9 @@ impl DecisionTreeClassifier {
         };
 
         //println!("{:?} -- {:?}", dataset_left, dataset_right);
+
+        let now2 = Instant::now();
+        println!("split {:?}", now2.duration_since(now));
         (dataset_left, dataset_right, y_left, y_right)
     }
 
@@ -366,15 +330,17 @@ impl DecisionTreeClassifier {
         let weight_l: f32 = l_child.len() as f32 / parent.len() as f32;
         let weight_r: f32 = r_child.len() as f32 / parent.len() as f32;
         //println!("{:?} -- {:?}", weight_l, weight_r);
-
+        let now = Instant::now();
         let gain: f32 = self.gini_index(parent)
             - (weight_l * self.gini_index(l_child) + weight_r * self.gini_index(r_child));
         //println!("gini: {}", gain);
-
+        let now2 = Instant::now();
+        println!("info_gain {:?}", now2.duration_since(now));
         gain
     }
 
     pub fn calculate_leaf_value(&mut self, Y: &Vec<i32>) -> i32 {
+        let now = Instant::now();
         let max = Y
             .iter()
             .fold(HashMap::<i32, usize>::new(), |mut m, x| {
@@ -384,7 +350,8 @@ impl DecisionTreeClassifier {
             .into_iter()
             .max_by_key(|(_, v)| *v)
             .map(|(k, _)| k);
-
+        let now2 = Instant::now();
+        println!("leaf_value {:?}", now2.duration_since(now));
         max.unwrap()
     }
 
@@ -431,7 +398,12 @@ impl DecisionTreeClassifier {
             }
         }
         //println!("{:?}", ps);
+        let now = Instant::now();
         self.root = self.build_tree(X, Y, &ps, 0);
+
+        let now2 = Instant::now();
+
+        println!("build_tree: {:?}", now2.duration_since(now));
     }
 
     pub fn make_prediction(&self, X: &[f32], tree: &Option<Box<Node>>) -> i32 {
