@@ -166,6 +166,8 @@ impl DecisionTreeClassifier {
 
         let mut max_info_gain = -std::f32::INFINITY;
 
+        let mut evaluation: (bool, f32);
+
         for feature_index in 0..num_features {
             let mut c = 0;
 
@@ -177,32 +179,26 @@ impl DecisionTreeClassifier {
                 //println!("aaaaaaaaaa -> {:?} - {:?}", feature_index, threshold);
 
                 c += 1;
-                let dataset_splitted: (Matrix, Matrix, Vec<i32>, Vec<i32>) =
-                    self.split(X, Y, feature_index, threshold);
-
-                let dataset_left: Matrix = dataset_splitted.0;
-                let dataset_right: Matrix = dataset_splitted.1;
-
-                if dataset_left.row > 0 && dataset_right.row > 0 {
-                    let y_left: Vec<i32> = dataset_splitted.2;
-                    let y_right: Vec<i32> = dataset_splitted.3;
-
-                    let curr_info_gain = self.information_gain(Y, &y_left, &y_right);
-
-                    if curr_info_gain > max_info_gain {
+                evaluation = self.evaluate_split(&X, &Y, feature_index, threshold);
+                if evaluation.0 {
+                    if evaluation.1 > max_info_gain {
                         best_split.feature_index = feature_index;
                         best_split.threshold = threshold;
-                        best_split.dataset_left = dataset_left;
-                        best_split.dataset_right = dataset_right;
-                        best_split.info_gain = curr_info_gain;
-                        best_split.y_left = y_left;
-                        best_split.y_right = y_right;
-                        max_info_gain = curr_info_gain;
+                        best_split.info_gain = evaluation.1;
+
+                        max_info_gain = evaluation.1;
                     }
                 }
             }
         }
 
+        let dataset_splitted: (Matrix, Matrix, Vec<i32>, Vec<i32>) =
+            self.split(&X, &Y, best_split.feature_index, best_split.threshold);
+
+        best_split.y_left = dataset_splitted.2;
+        best_split.y_right = dataset_splitted.3;
+        best_split.dataset_left = dataset_splitted.0;
+        best_split.dataset_right = dataset_splitted.1;
         best_split
     }
 
@@ -218,7 +214,7 @@ impl DecisionTreeClassifier {
             vect
         });
         let now2 = Instant::now();
-        println!("class_labels {:?}", now2.duration_since(now));
+        //println!("class_labels {:?}", now2.duration_since(now));
         let _now2 = Instant::now();
         //println!("unique_vals,{:?},{:?}", now2.duration_since(now), Y.len());
 
@@ -264,6 +260,36 @@ impl DecisionTreeClassifier {
     }
     */
 
+    pub fn evaluate_split(
+        &mut self,
+        X: &Matrix,
+        Y: &Vec<i32>,
+        feature_index: usize,
+        threshold: f32,
+    ) -> (bool, f32) {
+        let n_cols = X.col;
+        let n_rows = X.row;
+
+        let mut y_right: Vec<i32> = vec![];
+        let mut y_left: Vec<i32> = vec![];
+
+        let mut value: i32;
+
+        for i in 0..n_rows {
+            value = Y[i];
+            if (X.data[i * n_cols + feature_index] <= threshold) {
+                y_left.push(value);
+            } else {
+                y_right.push(value);
+            }
+        }
+
+        (
+            (y_left.len() > 0 && y_right.len() > 0),
+            self.information_gain(&Y, &y_left, &y_right),
+        )
+    }
+
     pub fn split(
         &mut self,
         X: &Matrix,
@@ -283,13 +309,21 @@ impl DecisionTreeClassifier {
         let mut row_left = 0;
         let mut row_right = 0;
 
+        let mut v_y: &i32;
+        let mut v: &[f32];
+
         let now = Instant::now();
 
         for i in 0..n_rows {
             //println!("{} - {} - {}", i, (i*n_cols), (i*n_cols + n_cols)-1);
-            let v = &(X.data[(i * n_cols)..(i * n_cols + n_cols)]);
+            //let now3 = Instant::now();
 
-            let v_y: &i32 = &Y[i];
+            v = &(X.data[(i * n_cols)..(i * n_cols + n_cols)]);
+            //let now4 = Instant::now();
+            //println!("get {:?}", now4.duration_since(now3));
+
+            v_y = &Y[i];
+
             if v[feature_index] <= threshold {
                 vec_left.extend(v.iter());
                 y_left.push(*v_y);
@@ -313,11 +347,9 @@ impl DecisionTreeClassifier {
             row: row_right,
             col: n_cols,
         };
-
-        //println!("{:?} -- {:?}", dataset_left, dataset_right);
-
         let now2 = Instant::now();
-        println!("split {:?}", now2.duration_since(now));
+        //println!("split {:?}", now2.duration_since(now));
+
         (dataset_left, dataset_right, y_left, y_right)
     }
 
@@ -329,18 +361,17 @@ impl DecisionTreeClassifier {
     ) -> f32 {
         let weight_l: f32 = l_child.len() as f32 / parent.len() as f32;
         let weight_r: f32 = r_child.len() as f32 / parent.len() as f32;
-        //println!("{:?} -- {:?}", weight_l, weight_r);
-        let now = Instant::now();
+
+        //let now = Instant::now();
         let gain: f32 = self.gini_index(parent)
             - (weight_l * self.gini_index(l_child) + weight_r * self.gini_index(r_child));
-        //println!("gini: {}", gain);
-        let now2 = Instant::now();
-        println!("info_gain {:?}", now2.duration_since(now));
+
+        //let now2 = Instant::now();
+        //println!("info_gain {:?}", now2.duration_since(now));
         gain
     }
 
     pub fn calculate_leaf_value(&mut self, Y: &Vec<i32>) -> i32 {
-        let now = Instant::now();
         let max = Y
             .iter()
             .fold(HashMap::<i32, usize>::new(), |mut m, x| {
@@ -350,8 +381,7 @@ impl DecisionTreeClassifier {
             .into_iter()
             .max_by_key(|(_, v)| *v)
             .map(|(k, _)| k);
-        let now2 = Instant::now();
-        println!("leaf_value {:?}", now2.duration_since(now));
+
         max.unwrap()
     }
 
